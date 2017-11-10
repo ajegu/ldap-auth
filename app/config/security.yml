@@ -1,0 +1,45 @@
+# To get started with security, check out the documentation:
+# https://symfony.com/doc/current/security.html
+security:
+
+    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+    providers:
+        my_ldap:
+            ldap:
+                service: ldap
+                base_dn: '%ldap_base_dn%'
+                search_dn: '%ldap_search_dn%'
+                search_password: '%ldap_search_password%'
+#
+#    encoders:
+#        Symfony\Component\Security\Core\User\User: plaintext
+
+    firewalls:
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            anonymous: ~
+            # activate different ways to authenticate
+
+            # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
+            #http_basic: ~
+
+            # https://symfony.com/doc/current/security/form_login_setup.html
+            form_login_ldap:
+                login_path: login
+                check_path: login
+
+                service: ldap
+                dn_string: '{username}@domaine.local'
+
+            logout:
+                path: /logout
+                target: /login
+
+    access_control:
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/member, roles: ROLE_USER }
+        - { path: ^/admin, roles: ROLE_IHMPLUS_RC_ECRITURE_P }
